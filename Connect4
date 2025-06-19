@@ -1,0 +1,98 @@
+import java.util.Scanner;
+
+public class Main{
+    static final int ROWS = 6, COLS = 7;
+    static char[][] board = new char[ROWS][COLS];
+    static char currentPlayer = 'X';
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        initBoard();
+
+        while (true) {
+            printBoard();
+            System.out.print("Player " + currentPlayer + ", choose column (0-6): ");
+            int col = sc.nextInt();
+
+            if (col < 0 || col >= COLS || board[0][col] != '.') {
+                System.out.println("Invalid move. Try again.");
+                continue;
+            }
+
+            int row = dropDisc(col);
+            if (checkWin(row, col)) {
+                printBoard();
+                System.out.println("Player " + currentPlayer + " wins!");
+                break;
+            }
+
+            if (isBoardFull()) {
+                printBoard();
+                System.out.println("It's a draw!");
+                break;
+            }
+
+            currentPlayer = (currentPlayer == 'X') ? 'O' : 'X';
+        }
+
+        sc.close();
+    }
+
+    static void initBoard() {
+        for (int r = 0; r < ROWS; r++)
+            for (int c = 0; c < COLS; c++)
+                board[r][c] = '.';
+    }
+
+    static void printBoard() {
+        for (char[] row : board) {
+            for (char cell : row)
+                System.out.print(cell + " ");
+            System.out.println();
+        }
+        System.out.println("0 1 2 3 4 5 6\n");
+    }
+
+    static int dropDisc(int col) {
+        for (int r = ROWS - 1; r >= 0; r--) {
+            if (board[r][col] == '.') {
+                board[r][col] = currentPlayer;
+                return r;
+            }
+        }
+        return -1; // shouldn't happen
+    }
+
+    static boolean checkWin(int row, int col) {
+        return checkDir(row, col, 1, 0) >= 4 ||  // vertical
+               checkDir(row, col, 0, 1) >= 4 ||  // horizontal
+               checkDir(row, col, 1, 1) >= 4 ||  // diagonal \
+               checkDir(row, col, 1, -1) >= 4;   // diagonal /
+    }
+
+    static int checkDir(int r, int c, int dr, int dc) {
+        int count = 1;
+        for (int i = 1; i < 4; i++)
+            if (valid(r + dr * i, c + dc * i) && board[r + dr * i][c + dc * i] == currentPlayer)
+                count++;
+            else break;
+
+        for (int i = 1; i < 4; i++)
+            if (valid(r - dr * i, c - dc * i) && board[r - dr * i][c - dc * i] == currentPlayer)
+                count++;
+            else break;
+
+        return count;
+    }
+
+    static boolean valid(int r, int c) {
+        return r >= 0 && r < ROWS && c >= 0 && c < COLS;
+    }
+
+    static boolean isBoardFull() {
+        for (int c = 0; c < COLS; c++)
+            if (board[0][c] == '.')
+                return false;
+        return true;
+    }
+}
